@@ -1,15 +1,70 @@
 const { default: Axios } = require("axios");
 const cheerio = require("cheerio");
+const baseUrl = require("../constant/url");
+const qs = require("qs");
 
 const episodeHelper = {
+    getNonce: async () => {
+        let payload = {
+            action: "aa1208d27f29ca340c92c66d1926f13f"
+        }
+
+        try {
+            let url = `${baseUrl}/wp-admin/admin-ajax.php`
+            const response = await Axios.post(url, qs.stringify(payload), {
+                headers: {
+                    'Origin': baseUrl,
+                    'Cookie':'_ga=GA1.2.826878888.1673844093; _gid=GA1.2.1599003702.1674031831; _gat=1',
+                    'Referer': baseUrl,
+                    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:101.0) Gecko/20100101 Firefox/101.0',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    // 'Host': baseUrl,
+                    'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+                }
+            })
+            
+            return response.data.data
+        } catch (error) {
+            console.log(error)
+            return null
+        }
+    },
+    getUrlAjax: async (content, nonce) => {
+        try {
+            
+            let _e = JSON.parse(atob(content))
+            let payload = {
+                ..._e,
+                nonce: nonce,
+                action: "2a3505c93b0035d3f455df82bf976b84"
+            }
+
+            let url = `${baseUrl}/wp-admin/admin-ajax.php`
+            const response = await Axios.post(url, qs.stringify(payload), {
+                headers: {
+                    'Origin': baseUrl,
+                    'Cookie':'_ga=GA1.2.826878888.1673844093; _gid=GA1.2.1599003702.1674031831; _gat=1',
+                    'Referer': baseUrl,
+                    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:101.0) Gecko/20100101 Firefox/101.0',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    // 'Host': baseUrl,
+                    'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+                }
+            })
+
+            return atob(response.data.data)
+        } catch (error) {
+            console.log(error.message)
+            return null;
+        }
+    },
     get: async (url) => {
         try {
           const response = await Axios.get(url);
           const $ = cheerio.load(response.data);
           let source1 = $.html().search('"file":');
           let source2 = $.html().search("'file':");
-          console.log(source1);
-          console.log(source2);
+       
           if (source1 !== -1) {
             const end = $.html().indexOf('","');
             return $.html().substring(source1 + 8, end);
