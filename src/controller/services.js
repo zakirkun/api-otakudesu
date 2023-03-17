@@ -162,7 +162,7 @@ const Services = {
     
                 element.find(".penzbar").each((index, el) => {
                     title = $(el).find("a").text() || null
-                    endpoint = $(el).find("a").attr("href")
+                    endpoint = $(el).find("a").attr("href").replace(`${baseUrl}/anime`)
     
                     anime_list.push({
                         title,
@@ -176,19 +176,19 @@ const Services = {
                 return res.status(200).json({
                     status: true,
                     message: "success",
-                    manga_list: datas
+                    anime_list: datas
                 })
             }
             return res.send({
                 message: response.status,
-                manga_list: [],
+                anime_list: [],
             });
         } catch (error) {
             console.log(error);
             res.send({
                 status: false,
                 message: error,
-                manga_list: [],
+                anime_list: [],
             });
         }
     },
@@ -258,6 +258,23 @@ const Services = {
             });
         }
     },
+    getEmbedByContent: async(req, res) => {
+        try {
+            let nonce = await episodeHelper.getNonce();
+            let content = req.params.content 
+
+            const html_streaming = await episodeHelper.getUrlAjax(content, nonce)
+            const parse = cheerio.load(html_streaming)
+            const link = parse('iframe').attr('src')
+            const obj = {};
+            obj.streaming_url = link
+
+            res.send(obj);
+        } catch (err) {
+            console.log(err);
+            res.send(err)
+        }
+    },
     getAnimeEpisode: async (req, res) => {
         const endpoint = req.params.endpoint;
         const url = `${baseUrl}/episode/${endpoint}`;
@@ -297,86 +314,47 @@ const Services = {
             const streamLinkResponse = streamElement.find("iframe").attr("src");
             obj.link_stream_response = await episodeHelper.get(streamLinkResponse);
            
-            let nonce = await episodeHelper.getNonce()
+            
             let streaming1 = [];
             let streaming2 = [];
             let streaming3 = [];
 
-            $('.mirrorstream > .m360p > li').each(async(k, v) => {               
-                let content = $(v).find('a').data().content
-                const html_streaming = await episodeHelper.getUrlAjax(content, nonce)
-                const parse = cheerio.load(html_streaming)
-
+            $('#embed_holder > div.mirrorstream > ul.m360p > li').each((k, v) => {               
                 let driver = $(v).text()
-                let link_streaming = parse('iframe').attr('src')
 
                 streaming1.push({
-                    driver,
-                    link_streaming,
+                    driver: driver,
+                    link: "/api/v1/streaming/" + $(v).find('a').data().content
                 });
             })
 
-            $('.mirrorstream > .m480p > li').each(async(k, v) => {               
-                let content = $(v).find('a').data().content
-                const html_streaming = await episodeHelper.getUrlAjax(content, nonce)
-                const parse = cheerio.load(html_streaming)
 
+            $('.mirrorstream > .m480p > li').each(async(k, v) => {               
                 let driver = $(v).text()
-                let link_streaming = parse('iframe').attr('src')
 
                 streaming2.push({
-                    driver,
-                    link_streaming,
+                    driver: driver,
+                    link: "/api/v1/streaming/" + $(v).find('a').data().content
                 });
             })
 
             $('.mirrorstream > .m720p > li').each(async(k, v) => {               
-                let content = $(v).find('a').data().content
-                const html_streaming = await episodeHelper.getUrlAjax(content, nonce)
-                const parse = cheerio.load(html_streaming)
-
                 let driver = $(v).text()
-                let link_streaming = parse('iframe').attr('src')
 
                 streaming3.push({
-                    driver,
-                    link_streaming,
+                    driver: driver,
+                    link: "/api/v1/streaming/" + $(v).find('a').data().content
                 });
             })
 
-            obj.link_streaming_alternative = []
-            obj.link_streaming_alternative.push({ quality: '360p', straming: streaming1 })
-            obj.link_streaming_alternative.push({ quality: '480p', straming: streaming2 })
-            obj.link_streaming_alternative.push({ quality: '720p', straming: streaming3 })
+            obj.mirror_embed1 = { quality: '360p', straming: streaming1 };
+            obj.mirror_embed2 = { quality: '480p', straming: streaming2 };
+            obj.mirror_embed3 = { quality: '720p', straming: streaming3 };
 
             let low_quality;
             let medium_quality;
             let high_quality;
-            let mirror1 = [];
-            let mirror2 = [];
-            let mirror3 = [];
-    
-            $('#embed_holder > div.mirrorstream > ul.m360p > li').each((idx, el) => {
-                mirror1.push({
-                    host: $(el).find('a').text().trim(),
-                    id: $(el).find('a').attr('href'),
-                });
-            });
-            $('#embed_holder > div.mirrorstream > ul.m480p > li').each((idx, el) => {
-                mirror2.push({
-                    host: $(el).find('a').text().trim(),
-                    id: $(el).find('a').attr('href'),
-                });
-            });
-            $('#embed_holder > div.mirrorstream > ul.m720p > li').each((idx, el) => {
-                mirror3.push({
-                    host: $(el).find('a').text().trim(),
-                    id: $(el).find('a').attr('href'),
-                });
-            });
-            obj.mirror1 = { quality: '360p', mirrorList: mirror1 }
-            obj.mirror2 = { quality: '480p', mirrorList: mirror2 }
-            obj.mirror3 = { quality: '720p', mirrorList: mirror3 }
+
             if ($('#venkonten > div.venser > div.venutama > div.download > ul > li:nth-child(1)').text() === '') {
                 low_quality = episodeHelper.notFoundQualityHandler(response.data, 0)
                 medium_quality = episodeHelper.notFoundQualityHandler(response.data, 1)

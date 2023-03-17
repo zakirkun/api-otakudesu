@@ -38,5 +38,7 @@ router.get("/api/v1/batch/:endpoint", Services.getBatchLink)
 router.get("/api/v1/genres", Services.getGenreList) 
 // Get Genre Page -Done-
 router.get("/api/v1/genres/:genre/:page", Services.getGenrePage)
+// Get EMbed Streaming 
+router.get("/api/v1/streaming/:content", Services.getEmbedByContent)
 
 module.exports = route

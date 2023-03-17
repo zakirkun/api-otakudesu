@@ -31,7 +31,6 @@ const episodeHelper = {
     },
     getUrlAjax: async (content, nonce) => {
         try {
-            
             let _e = JSON.parse(atob(content))
             let payload = {
                 ..._e,
@@ -51,6 +50,7 @@ const episodeHelper = {
                     'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
                 }
             })
+            
 
             return atob(response.data.data)
         } catch (error) {
