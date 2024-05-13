@@ -160,9 +160,9 @@ const Services = {
                 let anime_list = []
                 let title, endpoint
     
-                element.find(".penzbar").each((index, el) => {
+                element.find(".jdlbar").each((index, el) => {
                     title = $(el).find("a").text() || null
-                    endpoint = $(el).find("a").attr("href").replace(`${baseUrl}/anime`)
+                    endpoint = $(el).find("a").attr("href").replace(`${baseUrl}/anime/`, "")
     
                     anime_list.push({
                         title,
