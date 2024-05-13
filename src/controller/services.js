@@ -151,7 +151,7 @@ const Services = {
         }
     },
     getAnimeList: async (req, res) => {
-        let url = `${baseUrl}/anime-list-2/`
+        let url = `${baseUrl}/anime-list/`
         try {
             const response = await services.fetchService(url, res)
             if (response.status === 200) {
