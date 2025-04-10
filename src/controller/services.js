@@ -8,48 +8,53 @@ const Services = {
         const page = req.params.page
         let url = page === 1 ? `${baseUrl}/ongoing-anime/` : `${baseUrl}/ongoing-anime/page/${page}/`
         try {
-            const response = await services.fetchService(url, res)
-            if (response.status === 200) {
-                const $ = cheerio.load(response.data)
-                const element = $(".rapi")
-                let ongoing = []
-                let title, thumb, total_episode, updated_on, updated_day, endpoint
-    
-                element.find("ul > li").each((index, el) => {
-                    title = $(el).find("h2").text().trim()
-                    thumb = $(el).find("img").attr("src")
-                    total_episode = $(el).find(".epz").text()
-                    updated_on = $(el).find(".newnime").text()
-                    updated_day = $(el).find(".epztipe").text()
-                    endpoint = $(el).find(".thumb > a").attr("href").replace(`${baseUrl}/anime/`, "").replace("/", "")
-    
-                    ongoing.push({
-                        title,
-                        thumb,
-                        total_episode,
-                        updated_on,
-                        updated_day,
-                        endpoint,
-                    })
-                })
-                return res.status(200).json({
-                    status: true,
-                    message: "success",
-                    ongoing,
-                    currentPage: page
+            const response = await services.fetchService(url)
+            
+            // Handle error response from fetchService
+            if (response.status === false) {
+                return res.status(500).json({
+                    status: false,
+                    message: response.message,
+                    ongoing: []
                 })
             }
-            return res.send({
-                message: response.status,
-                ongoing: [],
-            });
+
+            const $ = cheerio.load(response.data)
+            const element = $(".rapi")
+            let ongoing = []
+            let title, thumb, total_episode, updated_on, updated_day, endpoint
+
+            element.find("ul > li").each((index, el) => {
+                title = $(el).find("h2").text().trim()
+                thumb = $(el).find("img").attr("src")
+                total_episode = $(el).find(".epz").text()
+                updated_on = $(el).find(".newnime").text()
+                updated_day = $(el).find(".epztipe").text()
+                endpoint = $(el).find(".thumb > a").attr("href").replace(`${baseUrl}/anime/`, "").replace("/", "")
+
+                ongoing.push({
+                    title,
+                    thumb,
+                    total_episode,
+                    updated_on,
+                    updated_day,
+                    endpoint,
+                })
+            })
+
+            return res.status(200).json({
+                status: true,
+                message: "success",
+                ongoing,
+                currentPage: page
+            })
         } catch (error) {
-            console.log(error);
-            res.send({
+            console.log(error)
+            return res.status(500).json({
                 status: false,
-                message: error,
-                ongoing: [],
-            });
+                message: "Internal server error",
+                ongoing: []
+            })
         }
     },
     getCompleted: async (req, res) => {

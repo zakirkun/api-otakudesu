@@ -1,25 +1,42 @@
 {
-  "name": "web-scrapping",
-  "version": "1.0.0",
-  "description": "learn web scrapping",
+  "name": "otakudesu-anime-api",
+  "version": "2.0.0",
+  "description": "OtakuDesu Anime API with MySQL Database and Auto-Scraping",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "dev": "nodemon index.js"
+    "dev": "nodemon index.js",
+    "init-db": "node scripts/init-database.js",
+    "scrape-ongoing": "node -e \"require('./src/services/scraper').scrapeOngoingAnime(3)\"",
+    "scrape-completed": "node -e \"require('./src/services/scraper').scrapeCompletedAnime(3)\"",
+    "scrape-genres": "node -e \"require('./src/services/scraper').scrapeGenres()\"",
+    "check-episodes": "node -e \"require('./src/services/scraper').checkNewEpisodes()\""
   },
   "keywords": [
-    "nodejs"
+    "nodejs",
+    "api",
+    "otakudesu",
+    "anime",
+    "mysql",
+    "sequelize",
+    "scraper"
   ],
-  "author": "Rizkyfauziilmi",
+  "author": "Rizkyfauziilmi (Updated)",
   "license": "MIT",
   "dependencies": {
     "@vercel/analytics": "^0.1.11",
-    "axios": "^0.27.2",
-    "cheerio": "^1.0.0-rc.11",
+    "axios": "1.8.4",
+    "cheerio": "1.0.0",
     "cors": "^2.8.5",
-    "express": "^4.17.1",
+    "dotenv": "^16.3.1",
+    "express": "5.1.0",
+    "https-proxy-agent": "^7.0.6",
+    "mysql2": "^3.6.3",
+    "node-cron": "^3.0.2",
     "nodemon": "^2.0.20",
-    "puppeteer": "^19.2.2",
-    "qs": "^6.11.0"
+    "otakudesu-anime-api": "file:",
+    "puppeteer": "24.5.0",
+    "qs": "^6.11.0",
+    "sequelize": "^6.35.0"
   }
 }
